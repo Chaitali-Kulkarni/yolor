@@ -9,6 +9,7 @@ import cv2
 import torch
 import torch.backends.cudnn as cudnn
 from numpy import random
+import numpy as np
 
 from utils.google_utils import attempt_load
 from utils.datasets import LoadStreams, LoadImages
@@ -68,7 +69,7 @@ def detect(save_img=False):
     # Get names and colors
     names = load_classes(names)
     colors = [[random.randint(0, 255) for _ in range(3)] for _ in range(len(names))]
-
+    m=0;
     # Run inference
     t0 = time.time()
     img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
@@ -79,7 +80,8 @@ def detect(save_img=False):
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
         if img.ndimension() == 3:
             img = img.unsqueeze(0)
-
+        trans_img1 = np.zeros((1080,1920, 4), np.uint8)
+        trans_img2 = np.zeros((1080,1920, 4), np.uint8)
         # Inference
         t1 = time_synchronized()
         pred = model(img, augment=opt.augment)[0]
@@ -122,9 +124,19 @@ def detect(save_img=False):
                     if save_img or view_img:  # Add bbox to image
                         label = '%s %.2f' % (names[int(cls)], conf)
                         plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
+                        a=colors[int(cls)]
+                        if(len(a)==3):
+                          a.append(255)
+                        plot_one_box(xyxy, trans_img1, label=label, color=a, line_thickness=1)
+                        plot_one_box(xyxy, trans_img2, color=a, line_thickness=1)
 
             # Print time (inference + NMS)
             print('%sDone. (%.3fs)' % (s, t2 - t1))
+            image_name="/content/drive/MyDrive/transparent_images/output"+"trans"+str(m)+".png"
+            cv2.imwrite(image_name,trans_img2)
+            image_name="/content/drive/MyDrive/transparent_images/output"+"trans_label_"+str(m)+".png"
+            cv2.imwrite(image_name,trans_img1)
+            m=m+1
 
             # Stream results
             if view_img:
