@@ -58,7 +58,6 @@ def detect(save_img=False):
 
     # Set Dataloader
     vid_path, vid_writer = None, None
-    vid_path2, vid_writer2 = None, None
     if webcam:
         view_img = True
         cudnn.benchmark = True  # set True to speed up constant image size inference
@@ -79,13 +78,10 @@ def detect(save_img=False):
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
-        print("dimension initially is %d"img.ndimension());
         if img.ndimension() == 3:
             img = img.unsqueeze(0)
-            print("dimension later is %d"img.ndimension());
         trans_img1 = np.zeros((1080,1920, 4), np.uint8)
         trans_img2 = np.zeros((1080,1920, 4), np.uint8)
-        print("dimension of sero image is %d"trans_img1.ndimension());
         # Inference
         t1 = time_synchronized()
         pred = model(img, augment=opt.augment)[0]
@@ -106,7 +102,6 @@ def detect(save_img=False):
                 p, s, im0 = path, '', im0s
 
             save_path = str(Path(out) / Path(p).name)
-            save_path2 = str(Path(out) / trans_video.mp4)
             txt_path = str(Path(out) / Path(p).stem) + ('_%g' % dataset.frame if dataset.mode == 'video' else '')
             s += '%gx%g ' % img.shape[2:]  # print string
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
@@ -158,17 +153,15 @@ def detect(save_img=False):
                         vid_path = save_path
                         if isinstance(vid_writer, cv2.VideoWriter):
                             vid_writer.release()  # release previous video writer
-                        if isinstance(vid_writer2, cv2.VideoWriter):
-                            vid_writer2.release()  # release previous video writer
+
 
                         fourcc = 'mp4v'  # output video codec
                         fps = vid_cap.get(cv2.CAP_PROP_FPS)
                         w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                         h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                         vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*fourcc), fps, (w, h))
-                        vid_writer2 = cv2.VideoWriter2(save_path2, cv2.VideoWriter_fourcc(*fourcc), fps, (w, h))
                     vid_writer.write(im0)
-                    vid_writer2.write(trans_img1)                   
+               
 
     if save_txt or save_img:
         print('Results saved to %s' % Path(out))
