@@ -135,9 +135,7 @@ def detect(save_img=False):
             image_name="/content/drive/MyDrive/transparent_images/output"+"trans"+str(m)+".png"
             cv2.imwrite(image_name,trans_img2)
             image_name="/content/drive/MyDrive/transparent_images/output"+"trans_label_"+str(m)+".png"
-            cv2.imwrite(image_name,trans_img1)
-            image_name="/content/drive/MyDrive/transparent_images/output"+"frame_"+str(m)+".png"
-            cv2.imwrite(image_name,im0)            
+            cv2.imwrite(image_name,trans_img1)       
             m=m+1
 
             # Stream results
